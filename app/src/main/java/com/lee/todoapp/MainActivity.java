@@ -2,6 +2,7 @@ package com.lee.todoapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -16,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements EditTodoDialogFragment.EditTodoDialogListener {
     ArrayList<String> todoItems;
     ArrayAdapter<String> aToDoAdapter;
     ListView lvItems;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().setTitle("Your Todos");
         populateArrayItems();
         lvItems = (ListView) findViewById(R.id.lvitems);
         lvItems.setAdapter(aToDoAdapter);
@@ -36,10 +38,7 @@ public class MainActivity extends AppCompatActivity {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Intent i = new Intent(MainActivity.this, EditItemActivity.class);
-                        i.putExtra("position", position);
-                        i.putExtra("text", parent.getItemAtPosition(position).toString());
-                        startActivityForResult(i, REQUEST_CODE);
+                        showEditDialog(position, parent.getItemAtPosition(position).toString());
                     }
                 }
         );
@@ -52,6 +51,12 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    private void showEditDialog(int position, String text) {
+        FragmentManager fm = getSupportFragmentManager();
+        EditTodoDialogFragment editTodoDialogFragment = EditTodoDialogFragment.newInstance(position, text);
+        editTodoDialogFragment.show(fm, "fragment_edit_todo");
     }
 
 
@@ -98,5 +103,12 @@ public class MainActivity extends AppCompatActivity {
             aToDoAdapter.notifyDataSetChanged();
             writeItems();
         }
+    }
+
+    @Override
+    public void onFinishEditDialog(String text) {
+//        todoItems.set(position, text);
+        aToDoAdapter.notifyDataSetChanged();
+        writeItems();
     }
 }
